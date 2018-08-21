@@ -345,10 +345,10 @@ bool GstreamerPlayer::eventFilter(QObject *obj, QEvent *event)
 {
     if(obj==_slider)
     {
-        if (event->type()==QEvent::MouseButtonPress)           //判断类型
+        if (event->type()==QEvent::MouseButtonPress)
         {
             QMouseEvent *mouseEvent = static_cast<QMouseEvent *>(event);
-            if (mouseEvent->button() == Qt::LeftButton)	//判断左键
+            if (mouseEvent->button() == Qt::LeftButton)
             {
                int dur = _slider->maximum() - _slider->minimum();
                int pos = _slider->minimum() + dur * ((double)mouseEvent->x() / _slider->width());

@@ -4,8 +4,6 @@
 #include "gstreamerplayer.h"
 #include <QDebug>
 
-
-
 GST_PLUGIN_STATIC_DECLARE(QGC_VIDEOSINK_PLUGIN);
 
 static void gstputenv(const QString& key, const QString& root, const QString& path)

@@ -135,8 +135,6 @@ VideoEnabled {
 
 SOURCES += \
     main.cpp \
-#    mavlink_udp.c
-#    main_player.cpp
     gstreamerplayer.cpp
 
 HEADERS += \

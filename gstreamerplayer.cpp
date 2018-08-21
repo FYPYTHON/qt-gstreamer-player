@@ -15,11 +15,6 @@ GstreamerPlayer::GstreamerPlayer(QWidget *parent):QWidget(parent)
 
     connect(&_timer,&QTimer::timeout,this,&GstreamerPlayer::timeout);
 
-
-
-
-
-
 }
 GstreamerPlayer::~GstreamerPlayer()
 {
@@ -55,7 +50,6 @@ void GstreamerPlayer::setupUI()
     connect(_btnStop,SIGNAL(clicked()),this,SLOT(stop()));
 
     _slider = new QSlider(Qt::Horizontal);
-//    _slider->setRange(0,100);
 
 //    connect(_slider,SIGNAL(valueChanged(int)),this,SLOT(sliderRange(int)));
     connect(_slider,SIGNAL(sliderPressed()),this,SLOT(seek()));
@@ -63,9 +57,6 @@ void GstreamerPlayer::setupUI()
 
 
     _timeLabel = new QLabel("00:00:00");
-
-
-//    _videoWidget->setGeometry(0,100,600,500);
 
 
     _vlayout->addWidget(_openfile);
@@ -79,33 +70,31 @@ void GstreamerPlayer::setupUI()
     _vlayout->setStretchFactor(_slider,1);
     _vlayout->setStretchFactor(_hlayout,1);
 
-
-
-
     this->setLayout(_vlayout);
 }
 void GstreamerPlayer::onOpenfile()
 {
-    ready();
+//    ready();
     duration = GST_CLOCK_TIME_NONE;
-//    filename = QFileDialog::getOpenFileName(this,tr("open a video file"),".",
-//                                            "*.mp4 *.mov *.mkv");
-//    if(filename.length()==0){
-//        qWarning("filename:%s",filename.toStdString().c_str());
-//        QMessageBox::warning(this, tr("File open error"), tr("You selected ") + filename);
-//    }else{
-//        qWarning("filename is :%s",filename.toStdString().c_str());
-//        int ret=0;
-//        ret = this->ready();
-//        if(ret<0){
-//            QMessageBox::warning(this, tr("File play error"), tr("You selected ") + filename);
-//        }
-//    }
+
+    // open file to play
+    filename = QFileDialog::getOpenFileName(this,tr("open a video file"),".",
+                                            "*.mp4 *.mov *.mkv");
+    if(filename.length()==0){
+        qWarning("filename:%s",filename.toStdString().c_str());
+        QMessageBox::warning(this, tr("File open error"), tr("You selected ") + filename);
+    }else{
+        qWarning("filename is :%s",filename.toStdString().c_str());
+        int ret=0;
+        ret = this->ready();
+        if(ret<0){
+            QMessageBox::warning(this, tr("File play error"), tr("You selected ") + filename);
+        }
+    }
 }
 int GstreamerPlayer::ready()
 {
       /* Build the pipeline */
-      filename = "C:/workspace/Qt/testcode/gstreamtest/Video/2018-07-31_13.50.46.mov";
       pipeline = gst_element_factory_make ("playbin", "playbin");
       QString uri = "file:///" + filename;
       qDebug()<<"uri is :"<<uri;
@@ -153,47 +142,6 @@ int GstreamerPlayer::ready()
 
       /* Wait until error or EOS */
       bus = gst_element_get_bus (pipeline);
-//      msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
-
-//      do {
-//          msg = gst_bus_timed_pop_filtered (bus, GST_CLOCK_TIME_NONE, static_cast<GstMessageType>(GST_MESSAGE_ERROR | GST_MESSAGE_EOS));
-
-//          /* Parse message */
-//          if (msg != NULL) {
-//            GError *err;
-//            gchar *debug_info;
-
-//            switch (GST_MESSAGE_TYPE (msg)) {
-//              case GST_MESSAGE_ERROR:
-//                gst_message_parse_error (msg, &err, &debug_info);
-//                g_printerr ("Error received from element %s: %s\n", GST_OBJECT_NAME (msg->src), err->message);
-//                g_printerr ("Debugging information: %s\n", debug_info ? debug_info : "none");
-//                g_clear_error (&err);
-//                g_free (debug_info);
-//                terminate = TRUE;
-//                break;
-//              case GST_MESSAGE_EOS:
-//                g_print ("End-Of-Stream reached.\n");
-//                terminate = TRUE;
-//                break;
-//              case GST_MESSAGE_STATE_CHANGED:
-//                /* We are only interested in state-changed messages from the pipeline */
-//                if (GST_MESSAGE_SRC (msg) == GST_OBJECT (pipeline)) {
-//                  GstState old_state, new_state, pending_state;
-//                  gst_message_parse_state_changed (msg, &old_state, &new_state, &pending_state);
-//                  g_print ("Pipeline state changed from %s to %s:\n",
-//                      gst_element_state_get_name (old_state), gst_element_state_get_name (new_state));
-//                }
-//                break;
-//              default:
-//                /* We should not reach here */
-//                g_printerr ("Unexpected message received.\n");
-//                break;
-//            }
-//            gst_message_unref (msg);
-//          }
-//        } while (!terminate);
-      /* Free resources */
 
 //      gst_object_unref (bus);
 //      gst_element_set_state (pipeline, GST_STATE_NULL);
@@ -312,6 +260,7 @@ void GstreamerPlayer::setTimeLabel()
 }
 void GstreamerPlayer::timeout()
 {
+    // get current position when playing state
     if(!gst_element_query_position(pipeline,GST_FORMAT_TIME,&position))
     {
         qDebug()<<"Could not query position.\n";
@@ -327,6 +276,7 @@ void GstreamerPlayer::timeout()
               qDebug()<< "set slider range: 0"<<duration/1000000000<<endl;
           }
     }
+    // if play is over set state disable
     if(fabs(duration-position)<0.01){
         state = FALSE;
         position = -1;

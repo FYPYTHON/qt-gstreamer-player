@@ -62,7 +62,6 @@ VideoEnabled {
         $$PWD/gstqtvideosink/painters \
         $$PWD/gstqtvideosink/utils \
 
-    #-- QtGstreamer (gutted to our needs)
 
     HEADERS += \
         $$PWD/gstqtvideosink/delegates/basedelegate.h \

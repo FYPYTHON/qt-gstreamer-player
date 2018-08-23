@@ -106,7 +106,8 @@ int GstreamerPlayer::ready()
       /* Create the elements inside the sink bin */
 //      equalizer = gst_element_factory_make ("equalizer-3bands", "equalizer");
 //      convert = gst_element_factory_make ("audioconvert", "convert");
-//      sink = gst_element_factory_make ("autoaudiosink", "audio_sink");
+//      sink = gst_element_factory_make ("qtquick2videosink", "audio_sink");
+//      g_object_set(pipeline,"video-sink",sink,NULL);
 //      if (!equalizer || !convert || !sink) {
 //        g_printerr ("Not all elements could be created.\n");
 //        return -1;

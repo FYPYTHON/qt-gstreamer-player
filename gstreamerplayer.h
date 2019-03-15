@@ -14,13 +14,14 @@ class GstreamerPlayer:public QWidget
 {
     Q_OBJECT
 public:
-    GstreamerPlayer(QWidget *parent=NULL);
+    GstreamerPlayer(QWidget *parent=nullptr);
     ~GstreamerPlayer();
     void openfile();
     int ready();
     void setupUI();
 signals:
     void timeTextChanged();
+    void filenameChanged(QString);
 private slots:
     void play();
     void pause();
@@ -29,6 +30,7 @@ private slots:
     void seek();
     void seek(int);
     void onOpenfile();
+    void onFilenameChanged(QString);
     void setTimeLabel();
     void timeout();
 protected:
@@ -47,12 +49,14 @@ private:
     QVideoWidget* _videoWidget;
     QVBoxLayout*  _vlayout;
     QHBoxLayout*  _hlayout;
+    QHBoxLayout*  _file_layout;
     QPushButton*  _btnPlay;
     QPushButton*  _btnPause;
     QPushButton*  _btnStop;
     QPushButton*  _openfile;
     QSlider*      _slider;
     QLabel*       _timeLabel;
+    QLabel*       _filename_label;
     QWidget*      _myWidget;
 
 

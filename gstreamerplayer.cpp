@@ -4,14 +4,15 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
+#pragma warning ( disable : * )
 
 GstreamerPlayer::GstreamerPlayer(QWidget *parent):QWidget(parent)
 {
     setupUI();
     position = -1;
-    duration = GST_CLOCK_TIME_NONE;
+    duration = -1;  // GST_CLOCK_TIME_NONE;
     this->setWindowTitle(tr("My Gstream Player"));
-    this->resize(800,600);
+    this->resize(600,500);
 
     connect(&_timer,&QTimer::timeout,this,&GstreamerPlayer::timeout);
 
@@ -20,20 +21,24 @@ GstreamerPlayer::~GstreamerPlayer()
 {
     if (_videoWidget){
         delete _videoWidget;
-        _videoWidget = NULL;
+        _videoWidget = nullptr;
     }
 }
 void GstreamerPlayer::setupUI()
 {
     _hlayout = new QHBoxLayout();
+    _file_layout = new QHBoxLayout();
     _vlayout = new QVBoxLayout();
     _videoWidget = new QVideoWidget(this);
     _videoWidget->setBackgroundRole(QPalette::Dark);
 
     this->setWindowTitle(tr("My Gstream Player"));
+
     _openfile = new QPushButton();
     _openfile->setText(tr("Open File To Play"));
     connect(_openfile,SIGNAL(clicked()),this,SLOT(onOpenfile()));
+    _file_layout->addWidget(_openfile);
+    _file_layout->addSpacing(500);
 
     _btnPlay = new QPushButton();
     _btnPlay->setText(tr("play"));
@@ -55,17 +60,21 @@ void GstreamerPlayer::setupUI()
     connect(_slider,SIGNAL(sliderPressed()),this,SLOT(seek()));
     connect(_slider,SIGNAL(sliderMoved(int)),this,SLOT(seek(int)));
 
+    _filename_label = new QLabel("");
 
+    connect(this,SIGNAL(filenameChanged(QString)),this,SLOT(onFilenameChanged(QString)));
     _timeLabel = new QLabel("00:00:00");
 
 
-    _vlayout->addWidget(_openfile);
+    _vlayout->addLayout(_file_layout);
+    _vlayout->addWidget(_filename_label);
     _vlayout->addWidget(_videoWidget);
     _vlayout->addWidget(_timeLabel);
     _vlayout->addWidget(_slider);
     _vlayout->addLayout(_hlayout);
     _vlayout->setStretchFactor(_videoWidget,6);
     _vlayout->setStretchFactor(_openfile,1);
+    _vlayout->setStretchFactor(_filename_label,1);
     _vlayout->setStretchFactor(_timeLabel,1);
     _vlayout->setStretchFactor(_slider,1);
     _vlayout->setStretchFactor(_hlayout,1);
@@ -75,22 +84,29 @@ void GstreamerPlayer::setupUI()
 void GstreamerPlayer::onOpenfile()
 {
 //    ready();
-    duration = GST_CLOCK_TIME_NONE;
+    duration = -1;
 
     // open file to play
     filename = QFileDialog::getOpenFileName(this,tr("open a video file"),".",
                                             "*.mp4 *.mov *.mkv");
     if(filename.length()==0){
         qWarning("filename:%s",filename.toStdString().c_str());
-        QMessageBox::warning(this, tr("File open error"), tr("You selected ") + filename);
+        QMessageBox::warning(this, tr("File open error"), tr("You selected none ") + filename);
     }else{
         qWarning("filename is :%s",filename.toStdString().c_str());
         int ret=0;
         ret = this->ready();
+        emit filenameChanged(filename);
         if(ret<0){
             QMessageBox::warning(this, tr("File play error"), tr("You selected ") + filename);
         }
     }
+}
+void GstreamerPlayer::onFilenameChanged(QString filename)
+{
+    qDebug()<<"filename changed send is :"<<sender();
+    _filename_label->setText(filename);
+
 }
 int GstreamerPlayer::ready()
 {
@@ -101,7 +117,7 @@ int GstreamerPlayer::ready()
       g_object_set (pipeline, "uri", uri.toStdString().c_str(), NULL);
       guintptr hint = _videoWidget->winId();
       qDebug()<<hint<<endl;
-      gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY (pipeline), hint);
+      gst_video_overlay_set_window_handle(GST_VIDEO_OVERLAY(pipeline), hint);
 
       /* Create the elements inside the sink bin */
 //      equalizer = gst_element_factory_make ("equalizer-3bands", "equalizer");
@@ -179,7 +195,7 @@ void GstreamerPlayer::stop()
         gst_element_set_state(pipeline,GST_STATE_NULL);
         state = FALSE;
         position = -1;
-        duration = GST_CLOCK_TIME_NONE;
+        duration = -1;
     }
 
 }
@@ -272,7 +288,7 @@ void GstreamerPlayer::timeout()
             qDebug()<< ("Could not query current duration.\n");
           }
           else {
-              _slider->setRange(0,duration/1000000000);
+              _slider->setRange(0,int(duration/1000000000));
 //              _slider->setSingleStep(1);
               qDebug()<< "set slider range: 0"<<duration/1000000000<<endl;
           }
@@ -281,7 +297,7 @@ void GstreamerPlayer::timeout()
     if(fabs(duration-position)<0.01){
         state = FALSE;
         position = -1;
-        duration = GST_CLOCK_TIME_NONE;
+        duration = -1;
         _timer.stop();
 
     }

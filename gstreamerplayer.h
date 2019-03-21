@@ -19,6 +19,7 @@ public:
     void openfile();
     int ready();
     void setupUI();
+    void send_seek_event(gdouble rate);
 signals:
     void timeTextChanged();
     void filenameChanged(QString);
@@ -33,6 +34,7 @@ private slots:
     void onFilenameChanged(QString);
     void setTimeLabel();
     void timeout();
+    void quick();
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
@@ -44,19 +46,23 @@ private:
     gboolean state = FALSE;
     qint64 duration;
     qint64 position;
+    gdouble rate;
     QString filename;
     QTimer _timer;
     QVideoWidget* _videoWidget;
     QVBoxLayout*  _vlayout;
     QHBoxLayout*  _hlayout;
     QHBoxLayout*  _file_layout;
+    QHBoxLayout*  _filename_hlayout;
     QPushButton*  _btnPlay;
     QPushButton*  _btnPause;
     QPushButton*  _btnStop;
+    QPushButton*  _btnQuick;
     QPushButton*  _openfile;
     QSlider*      _slider;
     QLabel*       _timeLabel;
     QLabel*       _filename_label;
+    QLabel*       _rate_label;
     QWidget*      _myWidget;
 
 

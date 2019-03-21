@@ -4,13 +4,14 @@
 #include <QFileDialog>
 #include <QMessageBox>
 #include <QDebug>
-#pragma warning ( disable : * )
+const int DURATION_UNIT = 1000000000;
 
 GstreamerPlayer::GstreamerPlayer(QWidget *parent):QWidget(parent)
 {
     setupUI();
     position = -1;
     duration = -1;  // GST_CLOCK_TIME_NONE;
+    rate = 1.0;
     this->setWindowTitle(tr("My Gstream Player"));
     this->resize(600,500);
 
@@ -46,13 +47,19 @@ void GstreamerPlayer::setupUI()
     _btnPause->setText(tr("pause"));
     _btnStop = new QPushButton();
     _btnStop->setText(tr("stop"));
+    _btnQuick = new QPushButton(tr("quick"));
+    _rate_label = new QLabel(tr("x1"));
     _hlayout->addWidget(_btnPlay);
     _hlayout->addWidget(_btnPause);
     _hlayout->addWidget(_btnStop);
+    _hlayout->addWidget(_btnQuick);
+    _hlayout->addWidget(_rate_label);
     _hlayout->addSpacing(500);
     connect(_btnPlay,SIGNAL(clicked()),this,SLOT(play()));
     connect(_btnPause,SIGNAL(clicked()),this,SLOT(pause()));
     connect(_btnStop,SIGNAL(clicked()),this,SLOT(stop()));
+    connect(_btnQuick,SIGNAL(clicked()),this,SLOT(quick()));
+
 
     _slider = new QSlider(Qt::Horizontal);
 
@@ -60,14 +67,20 @@ void GstreamerPlayer::setupUI()
     connect(_slider,SIGNAL(sliderPressed()),this,SLOT(seek()));
     connect(_slider,SIGNAL(sliderMoved(int)),this,SLOT(seek(int)));
 
-    _filename_label = new QLabel("");
+    _filename_label = new QLabel("未选择");
+    _filename_hlayout = new QHBoxLayout();
+    _filename_hlayout->addStretch(50);
+    _filename_hlayout->addWidget(_filename_label);
+    _filename_hlayout->addStretch(50);
+    _filename_label->setGeometry(_videoWidget->pos().x()-(_videoWidget->width()/2),_videoWidget->pos().y(),100,50);
 
     connect(this,SIGNAL(filenameChanged(QString)),this,SLOT(onFilenameChanged(QString)));
     _timeLabel = new QLabel("00:00:00");
 
 
     _vlayout->addLayout(_file_layout);
-    _vlayout->addWidget(_filename_label);
+//    _vlayout->addWidget(_filename_label, 300);
+    _vlayout->addLayout(_filename_hlayout);
     _vlayout->addWidget(_videoWidget);
     _vlayout->addWidget(_timeLabel);
     _vlayout->addWidget(_slider);
@@ -87,7 +100,7 @@ void GstreamerPlayer::onOpenfile()
     duration = -1;
 
     // open file to play
-    filename = QFileDialog::getOpenFileName(this,tr("open a video file"),".",
+    filename = QFileDialog::getOpenFileName(this,tr("open a video file"),"E:/",
                                             "*.mp4 *.mov *.mkv");
     if(filename.length()==0){
         qWarning("filename:%s",filename.toStdString().c_str());
@@ -111,6 +124,9 @@ void GstreamerPlayer::onFilenameChanged(QString filename)
 int GstreamerPlayer::ready()
 {
       /* Build the pipeline */
+//      sink = gst_element_factory_make ("qtquick2videosink", "audio_sink");
+//      sink = gst_element_factory_make ("autovideosink", "sink");
+//      g_object_set(pipeline,"video-sink",sink,NULL);
       pipeline = gst_element_factory_make ("playbin", "playbin");
       QString uri = "file:///" + filename;
       qDebug()<<"uri is :"<<uri;
@@ -123,7 +139,6 @@ int GstreamerPlayer::ready()
 //      equalizer = gst_element_factory_make ("equalizer-3bands", "equalizer");
 //      convert = gst_element_factory_make ("audioconvert", "convert");
 //      sink = gst_element_factory_make ("qtquick2videosink", "audio_sink");
-//      g_object_set(pipeline,"video-sink",sink,NULL);
 //      if (!equalizer || !convert || !sink) {
 //        g_printerr ("Not all elements could be created.\n");
 //        return -1;
@@ -173,6 +188,10 @@ void GstreamerPlayer::play()
     {
 //        ready();
         qDebug()<<"play clicked.";
+        if(!_timer.isActive()){
+            _timer.start(1000);
+        }
+
         gst_element_set_state(pipeline,GST_STATE_PLAYING);
     }
 
@@ -181,8 +200,9 @@ void GstreamerPlayer::pause()
 {
     if(pipeline)
     {
-        qDebug()<<"pause clicked.";
-        _slider->setValue(1);
+        qDebug()<<"pause clicked."<<position/DURATION_UNIT;
+//        _slider->setValue(1);
+        _timer.stop();
         gst_element_set_state(pipeline,GST_STATE_PAUSED);
     }
 
@@ -191,11 +211,12 @@ void GstreamerPlayer::stop()
 {
     if(pipeline)
     {
-        qDebug()<<"stop clicked.";
+        qDebug()<<"stop clicked."<<position/DURATION_UNIT;
         gst_element_set_state(pipeline,GST_STATE_NULL);
         state = FALSE;
         position = -1;
         duration = -1;
+        _timer.stop();
     }
 
 }
@@ -241,7 +262,7 @@ void GstreamerPlayer::sliderRange(int value)
             qDebug()<< ("Could not query current duration.\n");
           }
           else {
-              _slider->setRange(0,duration/1000000000);
+              _slider->setRange(0,int(duration/DURATION_UNIT));
 //              _slider->setSingleStep(1);
               qDebug()<< "set slider range"<<endl;
           }
@@ -267,7 +288,7 @@ void GstreamerPlayer::setTimeLabel()
         _timeLabel->setText(time);
         _slider->setValue(times);
 
-        qDebug()<<"label:"<<time<<"curtime:"<<times<<endl;
+//        qDebug()<<"label:"<<time<<"curtime:"<<times<<endl;
     }
     else {
         time = tr("00:00:00");
@@ -304,7 +325,7 @@ void GstreamerPlayer::timeout()
     else{
         state = TRUE;
     }
-    qDebug()<<"times going"<<position/1000000000<<endl;
+//    qDebug()<<"times going"<<position/1000000000<<endl;
     setTimeLabel();
 
 }
@@ -318,7 +339,7 @@ bool GstreamerPlayer::eventFilter(QObject *obj, QEvent *event)
             if (mouseEvent->button() == Qt::LeftButton)
             {
                int dur = _slider->maximum() - _slider->minimum();
-               int pos = _slider->minimum() + dur * ((double)mouseEvent->x() / _slider->width());
+               int pos = _slider->minimum() + dur * static_cast<int>((double)mouseEvent->x() / _slider->width());
                if(pos != _slider->sliderPosition())
                 {
                    qDebug()<<"event filter:"<<pos<<endl;
@@ -328,4 +349,47 @@ bool GstreamerPlayer::eventFilter(QObject *obj, QEvent *event)
         }
     }
     return QObject::eventFilter(obj,event);
+}
+void GstreamerPlayer::send_seek_event(gdouble rate)
+{
+    GstFormat format = GST_FORMAT_TIME;
+    GstEvent *seek_event;
+
+      /* Obtain the current position, needed for the seek event */
+    if (!gst_element_query_position (pipeline, format, &position)) {
+        g_printerr ("Unable to retrieve current position.\n");
+        return;
+    }
+
+      /* Create the seek event */
+    if (rate > 0) {
+       seek_event = gst_event_new_seek (rate, GST_FORMAT_TIME, static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE),
+           GST_SEEK_TYPE_SET, position, GST_SEEK_TYPE_NONE, 0);
+    } else {
+        seek_event = gst_event_new_seek (rate, GST_FORMAT_TIME, static_cast<GstSeekFlags>(GST_SEEK_FLAG_FLUSH | GST_SEEK_FLAG_ACCURATE),
+            GST_SEEK_TYPE_SET, 0, GST_SEEK_TYPE_SET, position);
+      }
+
+      if (sink == nullptr) {
+        /* If we have not done so, obtain the sink through which we will send the seek events */
+        g_object_get (pipeline, "video-sink", sink, NULL);
+      }
+
+      /* Send the event */
+      gst_element_send_event (pipeline, seek_event);
+
+      g_print ("Current rate: %g\n", rate);
+}
+void GstreamerPlayer::quick()
+{
+    if(rate >=31.99)
+    {
+        rate = 1.0;
+    }else{
+        rate *= 2;
+    }
+
+//    qDebug()<<"quick clicked;"<<rate;
+    _rate_label->setText(QString("x%1").arg(int(rate)));
+    send_seek_event(rate);
 }

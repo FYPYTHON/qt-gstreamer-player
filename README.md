@@ -1,4 +1,4 @@
-![Image text](https://raw.githubusercontent.com/FYPYTHON/qt-gstreamer-player/img/demo.png)
+![Image text](https://github.com/FYPYTHON/qt-gstreamer-player/blob/master/img/demo.png)
 # qt-gstreamer-player
 qstreamer player gui based on qt
 # requirement

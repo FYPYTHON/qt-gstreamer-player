@@ -5,15 +5,39 @@
 #include <QMessageBox>
 #include <QDebug>
 const int DURATION_UNIT = 1000000000;
+const int XINI = 35;
+const int YINI = 20;
+const int XSTEP = 80;
+const int YSTEP = 84;
+const int XWIDTH = 50;
+const int YHEIGHT = 50;
+
+static QPixmap get_copy(int x,int y, QPixmap *pix)
+{
+//    return pix->copy(XINI + XSTEP * x,
+//                         YINI + YSTEP * y,
+//                         XWIDTH, YHEIGHT).scaled(
+//                         btn->width(),
+//                         btn->height()).scaled(
+//                btn->width(), btn->height());
+    return pix->copy(XINI + XSTEP * x,
+                         YINI + YSTEP * y,
+                         XWIDTH, YHEIGHT);
+
+}
 
 GstreamerPlayer::GstreamerPlayer(QWidget *parent):QWidget(parent)
 {
+    _fileListWidget = nullptr;
+
+    _allico = new QPixmap(":/images/img/allico.jpg");
+    this->setWindowIcon(QIcon(":/images/img/logo0.png"));
     setupUI();
     position = -1;
     duration = -1;  // GST_CLOCK_TIME_NONE;
     rate = 1.0;
     this->setWindowTitle(tr("My Gstream Player"));
-    this->resize(600,500);
+    this->resize(WIN_WIDTH,WIN_HEIGTH);
 
     connect(&_timer,&QTimer::timeout,this,&GstreamerPlayer::timeout);
 
@@ -27,6 +51,7 @@ GstreamerPlayer::~GstreamerPlayer()
 }
 void GstreamerPlayer::setupUI()
 {
+    _all_lay_out = new QHBoxLayout();
     _hlayout = new QHBoxLayout();
     _file_layout = new QHBoxLayout();
     _vlayout = new QVBoxLayout();
@@ -42,19 +67,45 @@ void GstreamerPlayer::setupUI()
     _file_layout->addSpacing(500);
 
     _btnPlay = new QPushButton();
-    _btnPlay->setText(tr("play"));
+//    _btnPlay->setText(tr("play"));
+    _btnPlay->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 105 269 445;}");
+//    _btnPlay->resize(50,50);
+//    QIcon icon_play = QIcon(get_copy(5,1,_allico));
+
     _btnPause = new QPushButton();
-    _btnPause->setText(tr("pause"));
+//    _btnPause->setText(tr("pause"));
+    _btnPause->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 182 105 188 445;}");
+
     _btnStop = new QPushButton();
-    _btnStop->setText(tr("stop"));
-    _btnQuick = new QPushButton(tr("quick"));
+//    _btnStop->setText(tr("stop"));
+    _btnStop->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 263 105 107 445;}");
+
+    _btnQuick = new QPushButton();
+//    _btnQuick->setText(tr("quick"));
+    _btnQuick->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 344 188 26 362;}");
+
     _rate_label = new QLabel(tr("x1"));
+    _btnOpen = new QPushButton(tr("open"));
+    QIcon icon_open = QIcon(":/images/img/logo0.png");
+    _btnOpen->setIcon(icon_open);
+    connect(_btnOpen,SIGNAL(clicked()),this,SLOT(showFileWidget()));
+    _hlayout->addSpacing(150);
     _hlayout->addWidget(_btnPlay);
     _hlayout->addWidget(_btnPause);
     _hlayout->addWidget(_btnStop);
     _hlayout->addWidget(_btnQuick);
     _hlayout->addWidget(_rate_label);
-    _hlayout->addSpacing(500);
+    _hlayout->addSpacing(150);
+    _hlayout->addWidget(_btnOpen);
+//    _hlayout->setStretchFactor(_btnPlay,2);
+//    _hlayout->setStretchFactor(_btnPause,2);
+//    _hlayout->setStretchFactor(_btnStop,2);
+//    _hlayout->setStretchFactor(_btnQuick,2);
+//    _hlayout->setStretchFactor(_rate_label,1);
+//    _hlayout->setStretch(0,5);
+//    _hlayout->setStretch(1,10);
+//    _hlayout->setStretch(5,100);
+//    _hlayout->setStretchFactor(_btnOpen,2);
     connect(_btnPlay,SIGNAL(clicked()),this,SLOT(play()));
     connect(_btnPause,SIGNAL(clicked()),this,SLOT(pause()));
     connect(_btnStop,SIGNAL(clicked()),this,SLOT(stop()));
@@ -90,9 +141,67 @@ void GstreamerPlayer::setupUI()
     _vlayout->setStretchFactor(_filename_label,1);
     _vlayout->setStretchFactor(_timeLabel,1);
     _vlayout->setStretchFactor(_slider,1);
-    _vlayout->setStretchFactor(_hlayout,1);
+    _vlayout->setStretchFactor(_hlayout,2);
 
-    this->setLayout(_vlayout);
+    _all_lay_out->addLayout(_vlayout);
+    _fileListWidget = new QWidget();
+    _fileListWidget->hide();
+    _inputPath = new QLineEdit(_fileListWidget);
+    _inputPath->setGeometry(0,10,200, 30);
+    _btnDir = new QPushButton(_fileListWidget);
+//    _btnDir->setText(tr("file list"));
+    _btnDir->setGeometry(0,50,30,30);
+    _btnDir->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 182 520 188 30;}");
+
+    _btnClearDir = new QPushButton(_fileListWidget);
+    _btnClearDir->setGeometry(40,50,30,30);
+    _btnClearDir->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 520 269 30;}");
+
+    _fileListW = new QListWidget(_fileListWidget);
+    _fileListW->setGeometry(0, 100, 200, 400);
+    _fileListW->addItem("1");
+    _fileListW->addItem("2");
+    _fileListW->addItem("3");
+    _fileListW->addItem("4");
+
+//    QLabel *lbl = new QLabel(_fileListWidget);
+//    lbl->setPixmap(get_copy(1,1,_allico));
+//    QPushButton *qbn = new QPushButton(_fileListWidget);
+//    qbn->setGeometry(0, 0, 50, 50);
+//    qbn->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 437 269 113;}");
+//    qbn->resize(100,100);
+
+//    QPushButton *qbn2 = new QPushButton(_fileListWidget);
+//    qbn2->setText("test");
+//    qbn2->setGeometry(0, 110, 50, 50);
+//    qbn2->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 344 188 26 362;}");
+//    qbn2->resize(30,30);
+
+    _fileListWidget->resize(this->width()/4, this->height());
+    _all_lay_out->addWidget(_fileListWidget);
+
+//    this->setLayout(_vlayout);
+    _all_lay_out->setStretchFactor(_vlayout, 1);
+    _all_lay_out->setStretchFactor(_fileListWidget, 1);
+    this->setLayout(_all_lay_out);
+}
+void GstreamerPlayer::showFileWidget()
+{
+    if(nullptr == _fileListWidget){
+        _fileListWidget = new QWidget(this);
+    }
+//    _fileListWidget->setGeometry(0,0,50,50);
+    if (_fileListWidget->isHidden())
+    {
+       _fileListWidget->show();
+       this->resize(WIN_WIDTH + _fileListW->width(), WIN_HEIGTH);
+
+    }
+    else {
+       _fileListWidget->hide();
+       this->resize(WIN_WIDTH,WIN_HEIGTH);
+    }
+
 }
 void GstreamerPlayer::onOpenfile()
 {

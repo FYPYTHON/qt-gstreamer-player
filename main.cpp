@@ -21,6 +21,12 @@ int main(int argc, char *argv[]) {
     qDebug()<<"currentDir:"<<currentDir<<endl;
     gst_init (&argc, &argv);
     GstreamerPlayer *gplayer = new GstreamerPlayer();
+//    QIcon icon = QIcon(":/images/img/logo0.png");
+//    qDebug()<<icon.name();
+//    gplayer->setWindowIcon(icon);
+//    QUrl url("qrc:/images/logo0.png");
+//    QFile file(":/images/logo0.png");
+//    qDebug()<<"file:"<<file.exists()<<","<<url.isValid();
     gplayer->show();
     return app.exec();
 }

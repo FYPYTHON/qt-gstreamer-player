@@ -5,7 +5,6 @@ greaterThan(QT_MAJOR_VERSION, 4): QT += widgets
 TARGET = gstplayer
 TEMPLATE = app
 
-
 CONFIG(debug, debug|release) {
     DESTDIR  = $${OUT_PWD}/debug
     CONFIG  += DebugBuild
@@ -137,4 +136,8 @@ SOURCES += \
     gstreamerplayer.cpp
 
 HEADERS += \
-    gstreamerplayer.h
+    gstreamerplayer.h \
+    gstconfig.h
+
+RESOURCES += \
+    resource.qrc

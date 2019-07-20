@@ -1,0 +1,7 @@
+<RCC>
+    <qresource prefix="/images">
+        <file>img/logo0.png</file>
+        <file>img/name.ico</file>
+        <file>img/allico.jpg</file>
+    </qresource>
+</RCC>

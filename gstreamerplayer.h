@@ -1,6 +1,7 @@
 #ifndef GSTREAMERPLAYER_H
 #define GSTREAMERPLAYER_H
 #include <gst/gst.h>
+#include <gstconfig.h>
 #include <QWidget>
 #include <QVideoWidget>
 #include <QVBoxLayout>
@@ -10,6 +11,9 @@
 #include <QLabel>
 #include <QTimer>
 #include <QMouseEvent>
+#include <QBitmap>
+#include <QListWidget>
+#include <QLineEdit>
 class GstreamerPlayer:public QWidget
 {
     Q_OBJECT
@@ -35,6 +39,7 @@ private slots:
     void setTimeLabel();
     void timeout();
     void quick();
+    void showFileWidget();
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
@@ -54,16 +59,24 @@ private:
     QHBoxLayout*  _hlayout;
     QHBoxLayout*  _file_layout;
     QHBoxLayout*  _filename_hlayout;
+    QHBoxLayout*  _all_lay_out;
+    QPixmap*       _allico;
     QPushButton*  _btnPlay;
     QPushButton*  _btnPause;
     QPushButton*  _btnStop;
     QPushButton*  _btnQuick;
     QPushButton*  _openfile;
+    QPushButton*  _btnOpen;
     QSlider*      _slider;
     QLabel*       _timeLabel;
     QLabel*       _filename_label;
     QLabel*       _rate_label;
     QWidget*      _myWidget;
+    QWidget*      _fileListWidget;
+    QLineEdit*    _inputPath;
+    QPushButton*  _btnDir;
+    QPushButton*  _btnClearDir;
+    QListWidget*  _fileListW;
 
 
 };

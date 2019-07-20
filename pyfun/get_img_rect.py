@@ -31,4 +31,4 @@ def get_rect(x, y):
 if __name__ == "__main__":
     print(get_rect(5, 1))
     print(get_rect(5, 3))
-    print(get_rect(0, 1))
+    print(get_rect(2, 0))

@@ -5,12 +5,14 @@
 #include <QMessageBox>
 #include <QDebug>
 const int DURATION_UNIT = 1000000000;
-const int XINI = 35;
+const int XINI = 30;
 const int YINI = 20;
-const int XSTEP = 80;
-const int YSTEP = 84;
+const int XSTEP = 83;
+const int YSTEP = 81;
 const int XWIDTH = 50;
 const int YHEIGHT = 50;
+//const int PWIDTH = 600;
+//const int PHEIGHT = 420;
 
 static QPixmap get_copy(int x,int y, QPixmap *pix)
 {
@@ -40,6 +42,8 @@ GstreamerPlayer::GstreamerPlayer(QWidget *parent):QWidget(parent)
     this->resize(WIN_WIDTH,WIN_HEIGTH);
 
     connect(&_timer,&QTimer::timeout,this,&GstreamerPlayer::timeout);
+    connect(_fileListW,SIGNAL(itemClicked(QListWidgetItem*)),this,SLOT(singleclicked(QListWidgetItem*)));
+    connect(_fileListW,SIGNAL(itemDoubleClicked(QListWidgetItem*)),this,SLOT(doubleclicked(QListWidgetItem*)));
 
 }
 GstreamerPlayer::~GstreamerPlayer()
@@ -60,16 +64,13 @@ void GstreamerPlayer::setupUI()
 
     this->setWindowTitle(tr("My Gstream Player"));
 
-    _openfile = new QPushButton();
-    _openfile->setText(tr("Open File To Play"));
-    connect(_openfile,SIGNAL(clicked()),this,SLOT(onOpenfile()));
-    _file_layout->addWidget(_openfile);
+
     _file_layout->addSpacing(500);
 
     _btnPlay = new QPushButton();
 //    _btnPlay->setText(tr("play"));
     _btnPlay->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 105 269 445;}");
-//    _btnPlay->resize(50,50);
+    _btnPlay->resize(50,50);
 //    QIcon icon_play = QIcon(get_copy(5,1,_allico));
 
     _btnPause = new QPushButton();
@@ -83,29 +84,24 @@ void GstreamerPlayer::setupUI()
     _btnQuick = new QPushButton();
 //    _btnQuick->setText(tr("quick"));
     _btnQuick->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 344 188 26 362;}");
-
     _rate_label = new QLabel(tr("x1"));
+
     _btnOpen = new QPushButton(tr("open"));
     QIcon icon_open = QIcon(":/images/img/logo0.png");
     _btnOpen->setIcon(icon_open);
     connect(_btnOpen,SIGNAL(clicked()),this,SLOT(showFileWidget()));
     _hlayout->addSpacing(150);
     _hlayout->addWidget(_btnPlay);
+    _hlayout->addSpacing(10);
     _hlayout->addWidget(_btnPause);
+    _hlayout->addSpacing(10);
     _hlayout->addWidget(_btnStop);
+    _hlayout->addSpacing(10);
     _hlayout->addWidget(_btnQuick);
     _hlayout->addWidget(_rate_label);
     _hlayout->addSpacing(150);
     _hlayout->addWidget(_btnOpen);
-//    _hlayout->setStretchFactor(_btnPlay,2);
-//    _hlayout->setStretchFactor(_btnPause,2);
-//    _hlayout->setStretchFactor(_btnStop,2);
-//    _hlayout->setStretchFactor(_btnQuick,2);
-//    _hlayout->setStretchFactor(_rate_label,1);
-//    _hlayout->setStretch(0,5);
-//    _hlayout->setStretch(1,10);
-//    _hlayout->setStretch(5,100);
-//    _hlayout->setStretchFactor(_btnOpen,2);
+
     connect(_btnPlay,SIGNAL(clicked()),this,SLOT(play()));
     connect(_btnPause,SIGNAL(clicked()),this,SLOT(pause()));
     connect(_btnStop,SIGNAL(clicked()),this,SLOT(stop()));
@@ -152,30 +148,23 @@ void GstreamerPlayer::setupUI()
 //    _btnDir->setText(tr("file list"));
     _btnDir->setGeometry(0,50,30,30);
     _btnDir->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 182 520 188 30;}");
+    connect(_btnDir, SIGNAL(clicked()),this, SLOT(dirListGet()));
 
     _btnClearDir = new QPushButton(_fileListWidget);
     _btnClearDir->setGeometry(40,50,30,30);
     _btnClearDir->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 520 269 30;}");
+    connect(_btnClearDir, SIGNAL(clicked()),this, SLOT(dirListClear()));
+
+    _openfile = new QPushButton(_fileListWidget);
+    _openfile->setText(tr("Open File"));
+    _openfile->setGeometry(90,50,100,30);
+    _openfile->setIcon(QIcon(get_copy(2, 0, _allico)));
+    connect(_openfile,SIGNAL(clicked()),this,SLOT(onOpenfile()));
+//    _file_layout->addWidget(_openfile);
 
     _fileListW = new QListWidget(_fileListWidget);
     _fileListW->setGeometry(0, 100, 200, 400);
-    _fileListW->addItem("1");
-    _fileListW->addItem("2");
-    _fileListW->addItem("3");
-    _fileListW->addItem("4");
 
-//    QLabel *lbl = new QLabel(_fileListWidget);
-//    lbl->setPixmap(get_copy(1,1,_allico));
-//    QPushButton *qbn = new QPushButton(_fileListWidget);
-//    qbn->setGeometry(0, 0, 50, 50);
-//    qbn->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 101 437 269 113;}");
-//    qbn->resize(100,100);
-
-//    QPushButton *qbn2 = new QPushButton(_fileListWidget);
-//    qbn2->setText("test");
-//    qbn2->setGeometry(0, 110, 50, 50);
-//    qbn2->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 344 188 26 362;}");
-//    qbn2->resize(30,30);
 
     _fileListWidget->resize(this->width()/4, this->height());
     _all_lay_out->addWidget(_fileListWidget);
@@ -203,6 +192,47 @@ void GstreamerPlayer::showFileWidget()
     }
 
 }
+void GstreamerPlayer::dirListGet()
+{
+    curFileDir = QFileDialog::getExistingDirectory(this, tr("open a dir"),"E:/");
+//    qDebug()<<curFileDir<<endl;
+    QDir curDir(curFileDir);
+    const QStringList namefilters = PLAY_FILTER.split(" ");
+//    qDebug()<<namefilters<<endl;
+    qDebug()<<curDir.entryList(namefilters,QDir::Filter::Files);
+    qDebug()<<curDir.entryInfoList(namefilters,QDir::Filter::Files).first().absoluteFilePath();
+    _fileListW->addItems(curDir.entryList(namefilters,QDir::Filter::Files));
+    this->fillListFromDir(curDir.entryInfoList(namefilters,QDir::Filter::Files));
+
+}
+void GstreamerPlayer::fillListFromDir(QFileInfoList infolist)
+{
+    _fileListW->clear();
+    for(int i=0; i < infolist.count();i++)
+    {
+        QFileInfo tmpFileInfo = infolist.at(i);
+//        QString tmpName = tmpFileInfo.absoluteFilePath();
+        if (tmpFileInfo.isFile())
+        {
+            _fileListW->addItem(tmpFileInfo.absoluteFilePath());
+        }
+    }
+}
+void GstreamerPlayer::singleclicked(QListWidgetItem* item)
+{
+    qDebug()<<"current select:"<<item->text();
+}
+void GstreamerPlayer::doubleclicked(QListWidgetItem* item)
+{
+    filename = item->text();
+    qDebug()<<"current play:"<<filename<<endl;
+    this->ready();
+    this->play();
+}
+void GstreamerPlayer::dirListClear()
+{
+    _fileListW->clear();
+}
 void GstreamerPlayer::onOpenfile()
 {
 //    ready();
@@ -210,7 +240,7 @@ void GstreamerPlayer::onOpenfile()
 
     // open file to play
     filename = QFileDialog::getOpenFileName(this,tr("open a video file"),"E:/",
-                                            "*.mp4 *.mov *.mkv");
+                                            PLAY_FILTER);
     if(filename.length()==0){
         qWarning("filename:%s",filename.toStdString().c_str());
         QMessageBox::warning(this, tr("File open error"), tr("You selected none ") + filename);
@@ -219,6 +249,7 @@ void GstreamerPlayer::onOpenfile()
         int ret=0;
         ret = this->ready();
         emit filenameChanged(filename);
+        _fileListW->addItem(filename);
         if(ret<0){
             QMessageBox::warning(this, tr("File play error"), tr("You selected ") + filename);
         }

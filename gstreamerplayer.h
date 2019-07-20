@@ -14,6 +14,8 @@
 #include <QBitmap>
 #include <QListWidget>
 #include <QLineEdit>
+#include <QFileInfoList>
+#include <Filter.h>
 class GstreamerPlayer:public QWidget
 {
     Q_OBJECT
@@ -40,6 +42,11 @@ private slots:
     void timeout();
     void quick();
     void showFileWidget();
+    void dirListClear();
+    void dirListGet();
+    void fillListFromDir(QFileInfoList);
+    void singleclicked(QListWidgetItem*);
+    void doubleclicked(QListWidgetItem*);
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
@@ -53,6 +60,7 @@ private:
     qint64 position;
     gdouble rate;
     QString filename;
+    QString curFileDir;
     QTimer _timer;
     QVideoWidget* _videoWidget;
     QVBoxLayout*  _vlayout;

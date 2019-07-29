@@ -10,6 +10,7 @@ const QString PLAY_FILTER = "*.mp4 *.mov *.mkv *.avi *.rmvb *.rm *.flv";
 //rmvb、rm、FLV、mp4、3GP
 #endif // GSTCONFIG_H
 /*
+ * https://blog.csdn.net/huangqi734044860/article/details/61194287 //sceenshot
  * https://www.cnblogs.com/huty/p/8517018.html
  * v4l2src -> ffmpegcolorspace ->tee -> queue1 -> ximagesink
 

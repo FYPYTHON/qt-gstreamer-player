@@ -47,6 +47,8 @@ private slots:
     void fillListFromDir(QFileInfoList);
     void singleclicked(QListWidgetItem*);
     void doubleclicked(QListWidgetItem*);
+    void grapImage();
+
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
@@ -75,6 +77,7 @@ private:
     QPushButton*  _btnQuick;
     QPushButton*  _openfile;
     QPushButton*  _btnOpen;
+    QPushButton*  _btnScreenShot;
     QSlider*      _slider;
     QLabel*       _timeLabel;
     QLabel*       _filename_label;

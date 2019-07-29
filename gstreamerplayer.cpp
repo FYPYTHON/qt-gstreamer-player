@@ -3,6 +3,7 @@
 #include <gst/video/videooverlay.h>
 #include <QFileDialog>
 #include <QMessageBox>
+#include <QDateTime>
 #include <QDebug>
 const int DURATION_UNIT = 1000000000;
 const int XINI = 30;
@@ -90,6 +91,11 @@ void GstreamerPlayer::setupUI()
     QIcon icon_open = QIcon(":/images/img/logo0.png");
     _btnOpen->setIcon(icon_open);
     connect(_btnOpen,SIGNAL(clicked()),this,SLOT(showFileWidget()));
+
+    _btnScreenShot = new QPushButton();
+    _btnScreenShot->setStyleSheet("QPushButton{border-image:url(:/images/img/allico.jpg) 20 437 350 113;}");
+    connect(_btnScreenShot,SIGNAL(clicked()),this,SLOT(grapImage()));
+
     _hlayout->addSpacing(150);
     _hlayout->addWidget(_btnPlay);
     _hlayout->addSpacing(10);
@@ -100,6 +106,8 @@ void GstreamerPlayer::setupUI()
     _hlayout->addWidget(_btnQuick);
     _hlayout->addWidget(_rate_label);
     _hlayout->addSpacing(150);
+    _hlayout->addWidget(_btnScreenShot);
+    _hlayout->addSpacing(10);
     _hlayout->addWidget(_btnOpen);
 
     connect(_btnPlay,SIGNAL(clicked()),this,SLOT(play()));
@@ -232,6 +240,62 @@ void GstreamerPlayer::doubleclicked(QListWidgetItem* item)
 void GstreamerPlayer::dirListClear()
 {
     _fileListW->clear();
+}
+bool GstreamerPlayer::YV12ToARGB24_FFmpeg(unsigned char* pYUV,unsigned char* pBGR24,int width,int height)
+{
+    if (width < 1 || height < 1 || pYUV == nullptr || pBGR24 == nullptr)
+
+            return false;
+
+        AVPicture pFrameYUV, pFrameBGR;
+
+        avpicture_fill(&pFrameYUV, pYUV, PIX_FMT_NV12, width, height);
+
+        avpicture_fill(&pFrameBGR, pBGR24, AV_PIX_FMT_RGB24, width,height);
+
+
+
+        struct SwsContext* imgCtx = NULL;
+
+        imgCtx = sws_getContext(width, height, PIX_FMT_NV12, width, height, AV_PIX_FMT_RGB24, SWS_BICUBIC, 0, 0, 0);
+
+        if (imgCtx != NULL){
+
+            sws_scale(imgCtx, pFrameYUV.data, pFrameYUV.linesize, 0, height, pFrameBGR.data, pFrameBGR.linesize);
+
+            if(imgCtx){
+
+                sws_freeContext(imgCtx);
+
+                imgCtx = NULL;
+
+            }
+
+            return true;
+
+        }
+
+        else{
+
+            sws_freeContext(imgCtx);
+
+            imgCtx = NULL;
+
+            return false;
+
+        }
+}
+void GstreamerPlayer::grapImage()
+{
+    qDebug()<<"grapimage:"<<_videoWidget->rect()<<endl;
+    QPixmap gimage = _videoWidget->grab(_videoWidget->rect());
+    QString filePathName = "screenshot_";
+
+    filePathName += QDateTime::currentDateTime().toString("yyyy_MM_dd_hh-mm-ss-zzz");
+
+    filePathName += ".png";
+    qDebug()<<filePathName<<endl;
+    gimage.save(filePathName, "png");
 }
 void GstreamerPlayer::onOpenfile()
 {

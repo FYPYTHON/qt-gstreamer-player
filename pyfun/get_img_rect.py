@@ -1,5 +1,7 @@
 # coding=utf-8
-
+"""
+get allico.jpg
+"""
 XINI = 30
 YINI = 20
 XSTEP = 83
@@ -12,8 +14,8 @@ HEIGHT = 420
 
 def get_rect(x, y):
     """
-    :param x:  第 x 行
-    :param y:  第 y 列
+    :param x:  第 x 行, x方向
+    :param y:  第 y 列, y方向
     :return:
     y1 : 距离顶部
     width - x2 : 距离右边
@@ -32,3 +34,4 @@ if __name__ == "__main__":
     print(get_rect(5, 1))
     print(get_rect(5, 3))
     print(get_rect(2, 0))
+    print(get_rect(1, 0))

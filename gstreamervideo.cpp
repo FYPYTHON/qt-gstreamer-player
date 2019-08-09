@@ -76,3 +76,139 @@ void MainWindow::on_saveButton_clicked()
 		this->pixmap.save(fileName,format.toAscii());
 		//调用 save 方法保存当前图片到指定路径
 }
+
+QMediaPlayer *mPlayer;
+
+QVideoProbe *mVideoProbe;
+
+ 
+
+void Test::slotGrabMediaScreenFFMPEG()
+
+{
+
+    connect(mVideoProbe, SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(slotProcessFrameFFMPEG(QVideoFrame)));    
+
+}
+
+ 
+
+void Test::slotProcessFrameFFMPEG(const QVideoFrame & buffer)
+
+{
+
+    disconnect(mVideoProbe, SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(slotProcessFrameFFMPEG(QVideoFrame)));
+
+    if(!buffer.isValid()) // 数据是否有效
+
+    {
+
+        cout<<"frame is invalid"<<endl;
+
+        connect(mVideoProbe, SIGNAL(videoFrameProbed(QVideoFrame)), this, SLOT(slotProcessFrame(QVideoFrame)));
+
+        return;
+
+    }
+
+ 
+
+    QImage img;
+
+    QVideoFrame frame(buffer); // 拷贝数据
+
+    frame.map(QAbstractVideoBuffer::ReadOnly); // 将视频缓存映射到内存中
+
+ 
+
+    int totalBytes = frame.width() * frame.height() * 3;
+
+    uchar *imageBuffer = (uchar*)malloc(totalBytes);
+
+    if(!YV12ToARGB24_FFmpeg(frame.bits(), imageBuffer, frame.width(), frame.height()))
+
+    {
+
+        cout<<"convert YUV to RGB failed"<<endl;
+
+        return;
+
+    }
+
+ 
+
+    img = QImage(imageBuffer, frame.width(), frame.height(), //frame.bytesPerLine(),
+
+        //imageFormat);
+
+        QImage::Format_RGB888);
+
+ 
+
+    QString filePathName = "convert-vedio-";
+
+    filePathName += QDateTime::currentDateTime().toString("yyyy-MM-dd hh-mm-ss-zzz");
+
+    filePathName += ".png";
+
+    if(!img.save(filePathName,"png"))
+
+    {
+
+        cout<<"save convert vedio screen failed"<<endl;
+
+    }
+
+}
+
+ 
+
+ 
+
+bool Test::YV12ToARGB24_FFmpeg(unsigned char* pYUV,unsigned char* pBGR24,int width,int height)
+
+{    
+
+    if (width < 1 || height < 1 || pYUV == NULL || pBGR24 == NULL)
+
+        return false;
+
+    AVPicture pFrameYUV, pFrameBGR;
+
+    avpicture_fill(&pFrameYUV, pYUV, PIX_FMT_NV12, width, height);
+
+    avpicture_fill(&pFrameBGR, pBGR24, AV_PIX_FMT_RGB24, width,height);
+
+ 
+
+    struct SwsContext* imgCtx = NULL;
+
+    imgCtx = sws_getContext(width, height, PIX_FMT_NV12, width, height, AV_PIX_FMT_RGB24, SWS_BICUBIC, 0, 0, 0);
+
+    if (imgCtx != NULL){
+
+        sws_scale(imgCtx, pFrameYUV.data, pFrameYUV.linesize, 0, height, pFrameBGR.data, pFrameBGR.linesize);
+
+        if(imgCtx){
+
+            sws_freeContext(imgCtx);
+
+            imgCtx = NULL;
+
+        }
+
+        return true;
+
+    }
+
+    else{
+
+        sws_freeContext(imgCtx);
+
+        imgCtx = NULL;
+
+        return false;
+
+    }
+
+}

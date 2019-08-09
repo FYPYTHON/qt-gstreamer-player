@@ -241,50 +241,6 @@ void GstreamerPlayer::dirListClear()
 {
     _fileListW->clear();
 }
-bool GstreamerPlayer::YV12ToARGB24_FFmpeg(unsigned char* pYUV,unsigned char* pBGR24,int width,int height)
-{
-    if (width < 1 || height < 1 || pYUV == nullptr || pBGR24 == nullptr)
-
-            return false;
-
-        AVPicture pFrameYUV, pFrameBGR;
-
-        avpicture_fill(&pFrameYUV, pYUV, PIX_FMT_NV12, width, height);
-
-        avpicture_fill(&pFrameBGR, pBGR24, AV_PIX_FMT_RGB24, width,height);
-
-
-
-        struct SwsContext* imgCtx = NULL;
-
-        imgCtx = sws_getContext(width, height, PIX_FMT_NV12, width, height, AV_PIX_FMT_RGB24, SWS_BICUBIC, 0, 0, 0);
-
-        if (imgCtx != NULL){
-
-            sws_scale(imgCtx, pFrameYUV.data, pFrameYUV.linesize, 0, height, pFrameBGR.data, pFrameBGR.linesize);
-
-            if(imgCtx){
-
-                sws_freeContext(imgCtx);
-
-                imgCtx = NULL;
-
-            }
-
-            return true;
-
-        }
-
-        else{
-
-            sws_freeContext(imgCtx);
-
-            imgCtx = NULL;
-
-            return false;
-
-        }
-}
 void GstreamerPlayer::grapImage()
 {
     qDebug()<<"grapimage:"<<_videoWidget->rect()<<endl;

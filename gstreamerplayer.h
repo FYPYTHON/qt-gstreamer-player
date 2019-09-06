@@ -48,11 +48,13 @@ private slots:
     void singleclicked(QListWidgetItem*);
     void doubleclicked(QListWidgetItem*);
     void grapImage();
+    void gstImage();
 
 protected:
     bool eventFilter(QObject *obj, QEvent *event);
 private:
     GstElement *pipeline, *bin, *equalizer, *convert, *sink;
+    GstBuffer *pixbuf;
     GstPad *pad, *ghost_pad;
     GstBus *bus;
     GstMessage *msg;

@@ -2,6 +2,7 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 #include "gstreamerplayer.h"
+#include <gstopencv/goimage.h>
 #include <QDebug>
 
 GST_PLUGIN_STATIC_DECLARE(QGC_VIDEOSINK_PLUGIN);
@@ -27,6 +28,7 @@ int main(int argc, char *argv[]) {
 //    QUrl url("qrc:/images/logo0.png");
 //    QFile file(":/images/logo0.png");
 //    qDebug()<<"file:"<<file.exists()<<","<<url.isValid();
+    testop();
     gplayer->show();
     return app.exec();
 }

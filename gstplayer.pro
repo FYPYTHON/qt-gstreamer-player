@@ -16,11 +16,11 @@ CONFIG(debug, debug|release) {
     CONFIG      += VideoEnabled
 }
 
+# gstreamer path
 GST_ROOT = c:/gstreamer/1.0/x86
 #DEFINES += QT_DEPRECATED_WARNINGS
 LIBS        += -L$$GST_ROOT/lib -lgstreamer-1.0 -lgstvideo-1.0 -lgstbase-1.0
 LIBS        += -lglib-2.0 -lintl -lgobject-2.0
-
 
 
 INCLUDEPATH += \
@@ -133,11 +133,75 @@ VideoEnabled {
 
 SOURCES += \
     main.cpp \
-    gstreamerplayer.cpp
+    gstreamerplayer.cpp \
+    gstqtvideosink/delegates/basedelegate.cpp \
+    gstqtvideosink/delegates/qtquick2videosinkdelegate.cpp \
+    gstqtvideosink/delegates/qtvideosinkdelegate.cpp \
+    gstqtvideosink/delegates/qwidgetvideosinkdelegate.cpp \
+    gstqtvideosink/painters/genericsurfacepainter.cpp \
+    gstqtvideosink/painters/openglsurfacepainter.cpp \
+    gstqtvideosink/painters/videomaterial.cpp \
+    gstqtvideosink/painters/videonode.cpp \
+    gstqtvideosink/utils/bufferformat.cpp \
+    gstqtvideosink/utils/utils.cpp \
+    gstqtvideosink/gstqtglvideosink.cpp \
+    gstqtvideosink/gstqtglvideosinkbase.cpp \
+    gstqtvideosink/gstqtquick2videosink.cpp \
+    gstqtvideosink/gstqtvideosink.cpp \
+    gstqtvideosink/gstqtvideosinkbase.cpp \
+    gstqtvideosink/gstqtvideosinkplugin.cpp \
+    gstqtvideosink/gstqwidgetvideosink.cpp \
+    gstreamerplayer.cpp \
+    main.cpp \
+    gstqtvideosink/gstqtvideosinkmarshal.c \
+    gstopencv/optest.cpp
 
 HEADERS += \
     gstreamerplayer.h \
-    gstconfig.h
+    gstconfig.h \
+    gstqtvideosink/delegates/basedelegate.h \
+    gstqtvideosink/delegates/qtquick2videosinkdelegate.h \
+    gstqtvideosink/delegates/qtvideosinkdelegate.h \
+    gstqtvideosink/delegates/qwidgetvideosinkdelegate.h \
+    gstqtvideosink/painters/abstractsurfacepainter.h \
+    gstqtvideosink/painters/genericsurfacepainter.h \
+    gstqtvideosink/painters/openglsurfacepainter.h \
+    gstqtvideosink/painters/videomaterial.h \
+    gstqtvideosink/painters/videonode.h \
+    gstqtvideosink/utils/bufferformat.h \
+    gstqtvideosink/utils/glutils.h \
+    gstqtvideosink/utils/utils.h \
+    gstqtvideosink/gstqtglvideosink.h \
+    gstqtvideosink/gstqtglvideosinkbase.h \
+    gstqtvideosink/gstqtquick2videosink.h \
+    gstqtvideosink/gstqtvideosink.h \
+    gstqtvideosink/gstqtvideosinkbase.h \
+    gstqtvideosink/gstqtvideosinkmarshal.h \
+    gstqtvideosink/gstqtvideosinkplugin.h \
+    gstqtvideosink/gstqwidgetvideosink.h \
+    gstconfig.h \
+    gstreamerplayer.h \
+    gstopencv/goimage.h
 
 RESOURCES += \
     resource.qrc
+
+
+# opencv path
+# lib/Release  install/x86/vc15/lib
+OPENCV_ROOT = E:/Lib/opencv
+win32:CONFIG(release, debug|release): LIBS += -L$$OPENCV_ROOT/install/x86/vc15/lib/ -lopencv_world411
+else:win32:CONFIG(debug, debug|release): LIBS += -L$$OPENCV_ROOT/install/x86/vc15/lib/ -lopencv_world411d
+
+INCLUDEPATH += $$OPENCV_ROOT/install/x64/vc15/lib\
+               $$OPENCV_ROOT/install/x64/vc15/bin\
+               $$OPENCV_ROOT/install/include\
+               $$OPENCV_ROOT/install/include/opencv2
+
+DEPENDPATH += $$OPENCV_ROOT/install/x86/vc15\
+              $$OPENCV_ROOT/install/include
+
+OPENCV_ROOT_WIN = $$replace(OPENCV_ROOT, "/", "\\")
+QMAKE_POST_LINK += $$escape_expand(\\n) xcopy \"$$OPENCV_ROOT_WIN\\install\x86\vc15\bin\opencv_world411.dll\" \"$$DESTDIR_WIN\" /S/Y $$escape_expand(\\n)
+QMAKE_POST_LINK += xcopy \"$$OPENCV_ROOT_WIN\\install\x86\vc15\bin\opencv_world411d.dll\" \"$$DESTDIR_WIN\" /S/Y $$escape_expand(\\n)
+

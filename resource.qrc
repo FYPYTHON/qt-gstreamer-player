@@ -3,5 +3,6 @@
         <file>img/logo0.png</file>
         <file>img/name.ico</file>
         <file>img/allico.jpg</file>
+        <file>img/photo.png</file>
     </qresource>
 </RCC>

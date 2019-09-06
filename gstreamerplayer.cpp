@@ -253,6 +253,18 @@ void GstreamerPlayer::grapImage()
     qDebug()<<filePathName<<endl;
     gimage.save(filePathName, "png");
 }
+void GstreamerPlayer::gstImage()
+{
+    qDebug()<<"grapimage:"<<_videoWidget->rect()<<endl;
+    QPixmap gimage = _videoWidget->grab(_videoWidget->rect());
+    QString filePathName = "screenshot_";
+
+    filePathName += QDateTime::currentDateTime().toString("yyyy_MM_dd_hh-mm-ss-zzz");
+
+    filePathName += ".png";
+    qDebug()<<filePathName<<endl;
+    gimage.save(filePathName, "png");
+}
 void GstreamerPlayer::onOpenfile()
 {
 //    ready();

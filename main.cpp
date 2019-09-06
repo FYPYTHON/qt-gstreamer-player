@@ -2,7 +2,8 @@
 #include <gst/gst.h>
 #include <gst/video/videooverlay.h>
 #include "gstreamerplayer.h"
-#include <gstopencv/goimage.h>
+#include "mainwidget.h"
+//#include <gstopencv/goimage.h>
 #include <QDebug>
 
 GST_PLUGIN_STATIC_DECLARE(QGC_VIDEOSINK_PLUGIN);
@@ -21,14 +22,10 @@ int main(int argc, char *argv[]) {
     gstputenv("GST_PLUGIN_PATH", currentDir, "/gstreamer-plugins");  // register gstreamer-plugins
     qDebug()<<"currentDir:"<<currentDir<<endl;
     gst_init (&argc, &argv);
-    GstreamerPlayer *gplayer = new GstreamerPlayer();
-//    QIcon icon = QIcon(":/images/img/logo0.png");
-//    qDebug()<<icon.name();
-//    gplayer->setWindowIcon(icon);
-//    QUrl url("qrc:/images/logo0.png");
-//    QFile file(":/images/logo0.png");
-//    qDebug()<<"file:"<<file.exists()<<","<<url.isValid();
-    testop();
-    gplayer->show();
+//    GstreamerPlayer *gplayer = new GstreamerPlayer();
+    MainWiget *mainwiget = new MainWiget();
+    mainwiget->show();
+//    testop();
+//    gplayer->show();
     return app.exec();
 }

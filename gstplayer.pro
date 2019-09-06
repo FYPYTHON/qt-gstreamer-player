@@ -154,7 +154,8 @@ SOURCES += \
     gstreamerplayer.cpp \
     main.cpp \
     gstqtvideosink/gstqtvideosinkmarshal.c \
-    gstopencv/optest.cpp
+    gstopencv/optest.cpp \
+    mainwidget.cpp
 
 HEADERS += \
     gstreamerplayer.h \
@@ -181,7 +182,8 @@ HEADERS += \
     gstqtvideosink/gstqwidgetvideosink.h \
     gstconfig.h \
     gstreamerplayer.h \
-    gstopencv/goimage.h
+    gstopencv/goimage.h \
+    mainwidget.h
 
 RESOURCES += \
     resource.qrc

@@ -13,10 +13,13 @@ public:
     MainWiget(QWidget *parent=nullptr);
     ~MainWiget();
     void setupUI();
-
+signals:
+    void homeSignal();
 private slots:
     void showMImage();
     void showMVideo();
+    void showHome();
+
 
 private:
     QPushButton*   _btnimage;

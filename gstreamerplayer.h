@@ -29,6 +29,7 @@ public:
 signals:
     void timeTextChanged();
     void filenameChanged(QString);
+    void homeSignal();
 private slots:
     void play();
     void pause();

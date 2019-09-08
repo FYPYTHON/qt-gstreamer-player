@@ -40,6 +40,7 @@ void MainWiget::showMImage()
     if(nullptr == cvimage)
     {
         cvimage = new OpencvImage();
+        connect(cvimage, &OpencvImage::homeSignal, this, &MainWiget::showHome);
     }
     cvimage->show();
 
@@ -48,7 +49,20 @@ void MainWiget::showMVideo()
 {
     this->hide();
     if (nullptr == gplayer)
+    {
         gplayer = new GstreamerPlayer();
+        connect(gplayer, &GstreamerPlayer::homeSignal, this, &MainWiget::showHome);
+    }
     gplayer->show();
+
+}
+void MainWiget::showHome()
+{
+    if (nullptr != gplayer)
+        gplayer->hide();
+    if (nullptr != cvimage)
+        cvimage->hide();
+    this->show();
+
 
 }

@@ -24,6 +24,8 @@ public:
     ~OpencvImage();
     int testop();
     void setupUI();
+signals:
+    void homeSignal();
 private slots:
     void openImage();
 private:

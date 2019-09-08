@@ -31,7 +31,9 @@ private slots:
 private:
     QVBoxLayout *vlayout;
     QHBoxLayout *hlayout;
+    QHBoxLayout *homelayout;
     QPushButton *btnOpen;
+    QPushButton *_toHome;
     QLabel   *lfilename;
     QLabel   *limg;
     QString curImg;

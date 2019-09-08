@@ -65,7 +65,10 @@ void GstreamerPlayer::setupUI()
 
     this->setWindowTitle(tr("My Gstream Player"));
 
-
+    _home = new QPushButton();
+    _home->setText(tr("home"));
+    connect(_home, &QPushButton::clicked, this, &GstreamerPlayer::homeSignal);
+    _file_layout->addWidget(_home);
     _file_layout->addSpacing(500);
 
     _btnPlay = new QPushButton();

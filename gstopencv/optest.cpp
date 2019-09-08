@@ -39,6 +39,14 @@ void OpencvImage::setupUI()
 {
     vlayout = new QVBoxLayout();
     hlayout = new QHBoxLayout();
+    homelayout = new QHBoxLayout();
+
+    _toHome = new QPushButton();
+    _toHome->setText(tr("home"));
+    connect(_toHome, &QPushButton::clicked, this, &OpencvImage::homeSignal);
+    homelayout->addWidget(_toHome);
+    homelayout->addSpacing(500);
+
     lfilename = new QLabel(this);
     lfilename->setText(tr("未选择"));
     limg = new QLabel(this);
@@ -52,7 +60,7 @@ void OpencvImage::setupUI()
     hlayout->addWidget(btnOpen);
     hlayout->addStretch(2);
 
-
+    vlayout->addLayout(homelayout, 1);
     vlayout->addWidget(lfilename,1);
     vlayout->addStretch(10);
     vlayout->addWidget(limg, 8);

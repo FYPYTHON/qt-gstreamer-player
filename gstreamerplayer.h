@@ -81,6 +81,7 @@ private:
     QPushButton*  _openfile;
     QPushButton*  _btnOpen;
     QPushButton*  _btnScreenShot;
+    QPushButton*  _home;
     QSlider*      _slider;
     QLabel*       _timeLabel;
     QLabel*       _filename_label;

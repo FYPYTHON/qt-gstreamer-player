@@ -1,6 +1,7 @@
 # qstreamer player gui based on qt
 gstreamer lib to play video
 opencv lib to show image
+1823218990@qq.com
 # qt-gstreamer-player image
 ![image ui](https://github.com/FYPYTHON/qt-gstreamer-player/blob/master/img/demoi.png)
 

@@ -79,18 +79,17 @@ void OpencvImage::openImage()
     }
     else{
         qWarning("open imgage file: %s",curImg.toStdString().c_str());
-//        imread(curImg.toStdString());
-//        "E:/project/GitProject/qt-gstreamer-player/img/photo.png"
+
         lfilename->setText(curImg);
         Mat c_img = imread(curImg.toStdString());
         qDebug()<<"opencv:"<<c_img.rows<<","<<c_img.cols<<"\n"<<endl;
 
-    //    cv::imshow("test", img);
+
         cvtColor(c_img, c_img, COLOR_BGR2RGB);
         QImage disImage = QImage((const unsigned char*)(c_img.data), c_img.cols, c_img.rows, QImage::Format_RGB888);
         disImage.scaled(WIN_WIDTH - 50, WIN_HEIGTH - 100);
         limg->resize(WIN_WIDTH - 50, WIN_HEIGTH - 100);
-//        limg->move(this->width()/2 - limg->width()/2, this->height());
+
         qDebug()<<limg->x()<<","<<limg->y()<<endl<<this->width()<<","<<this->height();
         limg->setPixmap(QPixmap::fromImage(disImage.scaled(limg->size(), Qt::KeepAspectRatio)));
 

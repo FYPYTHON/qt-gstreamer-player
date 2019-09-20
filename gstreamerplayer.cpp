@@ -267,6 +267,14 @@ void GstreamerPlayer::gstImage()
     filePathName += ".png";
     qDebug()<<filePathName<<endl;
     gimage.save(filePathName, "png");
+
+    g_signal_emit_by_name(pipeline, "pull-buffer", &pixbuf);
+//    Mat mattemp;
+
+    gst_buffer_fill(pixbuf,0,"", 1920*1080*3);
+    if(pixbuf){
+        gst_buffer_unref(pixbuf);
+    }
 }
 void GstreamerPlayer::onOpenfile()
 {
